@@ -15,7 +15,11 @@ class RemoteExecutionConfigEditor extends SettingsEditor<RemoteExecutionConfig> 
     @Override
     protected void resetEditorFrom(@NotNull RemoteExecutionConfig o) {
         classToRun.setText(o.getClassToRun());
-        module.setText(o.getModule().getName());
+        if (o.getModules().length != 0) {
+            module.setText(o.getModule().getName());
+        } else {
+            module.setText("");
+        }
         commandArgs.setText(o.getCommandArgs());
     }
 

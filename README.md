@@ -6,5 +6,5 @@ Todo
    - ability to find leaked processes?
 - Saving settings across restart
 - JVM args
-- app args
 - test on real project
+- work out why saving/loading config doesnt work
