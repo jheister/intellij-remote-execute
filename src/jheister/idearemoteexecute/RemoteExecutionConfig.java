@@ -28,6 +28,7 @@ public class RemoteExecutionConfig extends LocatableConfigurationBase implements
     private Module module;
     private String classToRun;
     private String hostName = "latest-tim2app-001.mgmt.oy.net.local";
+    private String javaPath = "/usr/lib/jvm/zulu-8-amd64/bin/java";
 
     protected RemoteExecutionConfig(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(project, factory, name);
@@ -98,5 +99,9 @@ public class RemoteExecutionConfig extends LocatableConfigurationBase implements
 
     public String getHostName() {
         return hostName;
+    }
+
+    public String getJavaPath() {
+        return javaPath;
     }
 }

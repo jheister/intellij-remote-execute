@@ -44,7 +44,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
         return new String[] {
                 "ssh",
                 config.getHostName(),
-                "/usr/lib/jvm/zulu-8-amd64/bin/java -cp " + classpath + " " + config.getClassToRun()
+                config.getJavaPath() + " -cp " + classpath + " " + config.getClassToRun()
         };
     }
 
