@@ -2,7 +2,6 @@
 
 Todo
 - Handle remote process more sensibly
-   - stdout/stderr
    - terminating etc.
    - ability to find leaked processes?
 - Only allow run config on classes with main

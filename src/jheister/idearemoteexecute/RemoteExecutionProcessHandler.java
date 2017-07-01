@@ -30,8 +30,10 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     @Override
     public void startNotify() {
         Executors.newSingleThreadExecutor().execute(() -> {
-            executeCommand(syncCommand());
-            executeCommand(javaCommand());
+            if (executeCommand(syncCommand()) != 0) {
+                //todo: handle failure
+            }
+            notifyProcessTerminated(executeCommand(javaCommand()));
         });
 
         super.startNotify();
@@ -64,7 +66,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
         return cmdLine.toArray(new String[cmdLine.size()]);
     }
 
-    private void executeCommand(String[] cmd) {
+    private int executeCommand(String[] cmd) {
         notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
 
         try {
@@ -74,10 +76,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             io.execute(textNotifierOf(syncProcess.getInputStream(), SYSTEM));
             io.execute(textNotifierOf(syncProcess.getErrorStream(), STDERR));
 
-            int result = syncProcess.waitFor();
-            if (result != 0) {
-                notifyTextAvailable("Failed: " + result, STDERR);
-            }
+            return syncProcess.waitFor();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -102,12 +101,12 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     @Override
     protected void destroyProcessImpl() {
-        //todo: destroy it
+        notifyTextAvailable("Destroy is not implemented!\n", STDERR);
     }
 
     @Override
     protected void detachProcessImpl() {
-        //todo: work out if anything needs to happen here
+        notifyTextAvailable("Detatch is not implemented!\n", STDERR);
     }
 
     @Override
