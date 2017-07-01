@@ -2,9 +2,9 @@ package jheister.idearemoteexecute;
 
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.RunConfigurationProducer;
+import com.intellij.execution.application.ApplicationConfigurationType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.util.Ref;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 
@@ -21,23 +21,28 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
             return false;
         }
 
-        PsiClass psiClass = (PsiClass) configurationContext.getPsiLocation();
+        PsiClass mainClass = ApplicationConfigurationType.getMainClass(configurationContext.getPsiLocation());
 
-        VirtualFile file = psiClass.getContainingFile().getVirtualFile();
+        if (mainClass == null) {
+            return false;
+        }
+
         Module module = configurationContext.getModule();
 
         remoteExecutionConfig.setModule(module);
-        remoteExecutionConfig.setName(file.getName() + " in DC");
-        remoteExecutionConfig.setClassToRun(psiClass.getQualifiedName());
+        remoteExecutionConfig.setName(mainClass.getName() + ".main() in DC");
+        remoteExecutionConfig.setClassToRun(mainClass.getQualifiedName());
 
         return true;
     }
 
     @Override
     public boolean isConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig, ConfigurationContext configurationContext) {
-        return configurationContext.getPsiLocation() instanceof PsiClass
-                && configurationContext.getModule().equals(remoteExecutionConfig.getModule())
-                && ((PsiClass) configurationContext.getPsiLocation()).getQualifiedName().equals(remoteExecutionConfig.getClassToRun());
-    }
+        PsiClass mainClass = ApplicationConfigurationType.getMainClass(configurationContext.getPsiLocation());
 
+        return mainClass != null
+                && configurationContext.getPsiLocation() instanceof PsiClass
+                && configurationContext.getModule().equals(remoteExecutionConfig.getModule())
+                && mainClass.getQualifiedName().equals(remoteExecutionConfig.getClassToRun());
+    }
 }

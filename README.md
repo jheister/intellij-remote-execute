@@ -4,7 +4,6 @@ Todo
 - Handle remote process more sensibly
    - terminating etc.
    - ability to find leaked processes?
-- Only allow run config on classes with main
 - Allow clicking on main method / class with main method to run it
 - Allow setting of defaults
    - hostname to run against
