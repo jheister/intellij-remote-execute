@@ -25,7 +25,8 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+    <runConfigurationProducer implementation="jheister.idearemoteexecute.RemoteExecutionConfigProducer"/>
+    <configurationType implementation="jheister.idearemoteexecute.RemoteExecutionConfigType"/>
   </extensions>
 
   <actions>
