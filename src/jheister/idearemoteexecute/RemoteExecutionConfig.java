@@ -27,6 +27,7 @@ import java.util.List;
 public class RemoteExecutionConfig extends LocatableConfigurationBase implements RunProfileWithCompileBeforeLaunchOption {
     private Module module;
     private String classToRun;
+    private String commandArgs = "";
 
     protected RemoteExecutionConfig(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(project, factory, name);
@@ -93,5 +94,13 @@ public class RemoteExecutionConfig extends LocatableConfigurationBase implements
 
     public String getClassToRun() {
         return classToRun;
+    }
+
+    public String getCommandArgs() {
+        return commandArgs;
+    }
+
+    public void setCommandArgs(String commandArgs) {
+        this.commandArgs = commandArgs;
     }
 }

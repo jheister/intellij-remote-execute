@@ -8,28 +8,32 @@ import javax.swing.*;
 import java.awt.*;
 
 class RemoteExecutionConfigEditor extends SettingsEditor<RemoteExecutionConfig> {
-    private JLabel classToRun;
-    private JLabel module;
+    private JLabel classToRun = new JLabel("");
+    private JLabel module = new JLabel("");
+    private JTextField commandArgs = new JTextField();
 
     @Override
     protected void resetEditorFrom(@NotNull RemoteExecutionConfig o) {
-        classToRun.setText("Class: " + o.getClassToRun());
-        module.setText("Module: " + o.getModule().getName());
+        classToRun.setText(o.getClassToRun());
+        module.setText(o.getModule().getName());
+        commandArgs.setText(o.getCommandArgs());
     }
 
     @Override
     protected void applyEditorTo(@NotNull RemoteExecutionConfig o) throws ConfigurationException {
-
+        o.setCommandArgs(commandArgs.getText());
     }
 
     @NotNull
     @Override
     protected JComponent createEditor() {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        module = new JLabel("");
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+        panel.add(new JLabel("Module:"));
         panel.add(module);
-        classToRun = new JLabel("");
+        panel.add(new JLabel("Class:"));
         panel.add(classToRun);
+        panel.add(new JLabel("Program Arguments:"));
+        panel.add(commandArgs);
         return panel;
     }
 }
