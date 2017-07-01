@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.intellij.execution.process.ProcessOutputTypes.STDERR;
 import static com.intellij.execution.process.ProcessOutputTypes.STDOUT;
@@ -26,6 +27,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     private final RemoteExecutionConfig config;
     private final String hostName;
     private final String javaExec;
+    private Future<?> runningProcess;
 
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config) {
         this.config = config;
@@ -43,10 +45,12 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             return;
         }
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        runningProcess = Executors.newSingleThreadExecutor().submit(() -> {
             notifyTextAvailable("Going to run on " + hostName + " with " + javaExec + "\n", STDERR);
-            if (executeCommand(syncCommand(), SYSTEM) != 0) {
-                //todo: handle failure
+            int result = executeCommand(syncCommand(), SYSTEM);
+            if (result != 0) {
+                notifyTextAvailable("Sync failed: " + result + "\n", STDERR);
+                throw new RuntimeException("Sync failed");
             }
             notifyProcessTerminated(executeCommand(javaCommand(), STDOUT));
         });
@@ -56,6 +60,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
         String classpath = config.requiredFiles().stream().map(f -> "idea-remote-execution/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
         return new String[] {
                 "ssh",
+                "-tt",
                 hostName,
                 javaExec + " -cp " + classpath + " " + config.getClassToRun()
         };
@@ -89,7 +94,11 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             io.execute(textNotifierOf(syncProcess.getInputStream(), outType));
             io.execute(textNotifierOf(syncProcess.getErrorStream(), STDERR));
 
-            return syncProcess.waitFor();
+            try {
+                return syncProcess.waitFor();
+            } catch (InterruptedException e) {
+                return syncProcess.destroyForcibly().waitFor();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -114,12 +123,13 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     @Override
     protected void destroyProcessImpl() {
-        notifyTextAvailable("Destroy is not implemented!\n", STDERR);
+        runningProcess.cancel(true);
     }
 
     @Override
     protected void detachProcessImpl() {
-        notifyTextAvailable("Detatch is not implemented!\n", STDERR);
+        notifyTextAvailable("Detatch is not implemented, destroying instead\n", STDERR);
+        destroyProcessImpl();
     }
 
     @Override
