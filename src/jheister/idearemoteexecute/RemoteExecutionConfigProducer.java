@@ -14,13 +14,14 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
     }
 
     @Override
-    protected boolean setupConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig, ConfigurationContext configurationContext, Ref<PsiElement> ref) {
-        if (!(ref.get() instanceof PsiClass)) {
+    protected boolean setupConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig,
+                                                    ConfigurationContext configurationContext,
+                                                    Ref<PsiElement> ref) {
+        if (!(configurationContext.getPsiLocation() instanceof PsiClass)) {
             return false;
         }
 
-        PsiClass psiClass = (PsiClass) ref.get();
-
+        PsiClass psiClass = (PsiClass) configurationContext.getPsiLocation();
 
         VirtualFile file = psiClass.getContainingFile().getVirtualFile();
         Module module = configurationContext.getModule();
@@ -34,7 +35,9 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
 
     @Override
     public boolean isConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig, ConfigurationContext configurationContext) {
-        return false;
+        return configurationContext.getPsiLocation() instanceof PsiClass
+                && configurationContext.getModule().equals(remoteExecutionConfig.getModule())
+                && ((PsiClass) configurationContext.getPsiLocation()).getQualifiedName().equals(remoteExecutionConfig.getClassToRun());
     }
 
 }
