@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class RemoteExecutionProcessHandler extends ProcessHandler {
+    public static final String REMOTE_DIR = "idea-remote-execution";
     private final RemoteExecutionConfig config;
     private final String hostName;
     private final String javaExec;
@@ -57,7 +58,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     }
 
     private String[] javaCommand() {
-        String classpath = config.requiredFiles().stream().map(f -> "idea-remote-execution/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
+        String classpath = config.requiredFiles().stream().map(f -> REMOTE_DIR + "/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
         return new String[] {
                 "ssh",
                 "-tt",
@@ -78,7 +79,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
         cmdLine.add(0, "rsync");
         cmdLine.add(1, "-avh");
-        cmdLine.add(hostName + ":idea-remote-execution");
+        cmdLine.add(hostName + ":" + REMOTE_DIR);
         cmdLine.add("--delete");
 
         return cmdLine.toArray(new String[cmdLine.size()]);
