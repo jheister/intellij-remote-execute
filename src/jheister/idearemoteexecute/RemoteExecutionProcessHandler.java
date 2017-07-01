@@ -1,6 +1,7 @@
 package jheister.idearemoteexecute;
 
 import com.intellij.execution.process.ProcessHandler;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.util.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.intellij.execution.process.ProcessOutputTypes.STDERR;
+import static com.intellij.execution.process.ProcessOutputTypes.STDOUT;
 import static com.intellij.execution.process.ProcessOutputTypes.SYSTEM;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
@@ -22,29 +24,40 @@ import static java.util.stream.Collectors.toSet;
 
 public class RemoteExecutionProcessHandler extends ProcessHandler {
     private final RemoteExecutionConfig config;
+    private final String hostName;
+    private final String javaExec;
 
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config) {
         this.config = config;
+        hostName = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, "");
+        javaExec = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY, "");
     }
 
     @Override
     public void startNotify() {
+        super.startNotify();
+
+        if (hostName.isEmpty() || javaExec.isEmpty()) {
+            notifyTextAvailable("Host / Java exec not configured\n", STDERR);
+            notifyProcessTerminated(-1);
+            return;
+        }
+
         Executors.newSingleThreadExecutor().execute(() -> {
-            if (executeCommand(syncCommand()) != 0) {
+            notifyTextAvailable("Going to run on " + hostName + " with " + javaExec + "\n", STDERR);
+            if (executeCommand(syncCommand(), SYSTEM) != 0) {
                 //todo: handle failure
             }
-            notifyProcessTerminated(executeCommand(javaCommand()));
+            notifyProcessTerminated(executeCommand(javaCommand(), STDOUT));
         });
-
-        super.startNotify();
     }
 
     private String[] javaCommand() {
         String classpath = config.requiredFiles().stream().map(f -> "idea-remote-execution/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
         return new String[] {
                 "ssh",
-                config.getHostName(),
-                config.getJavaPath() + " -cp " + classpath + " " + config.getClassToRun()
+                hostName,
+                javaExec + " -cp " + classpath + " " + config.getClassToRun()
         };
     }
 
@@ -60,20 +73,20 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
         cmdLine.add(0, "rsync");
         cmdLine.add(1, "-avh");
-        cmdLine.add(config.getHostName() + ":idea-remote-execution");
+        cmdLine.add(hostName + ":idea-remote-execution");
         cmdLine.add("--delete");
 
         return cmdLine.toArray(new String[cmdLine.size()]);
     }
 
-    private int executeCommand(String[] cmd) {
+    private int executeCommand(String[] cmd, Key outType) {
         notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
 
         try {
             Process syncProcess = new ProcessBuilder(cmd).start();
 
             ExecutorService io = Executors.newCachedThreadPool();
-            io.execute(textNotifierOf(syncProcess.getInputStream(), SYSTEM));
+            io.execute(textNotifierOf(syncProcess.getInputStream(), outType));
             io.execute(textNotifierOf(syncProcess.getErrorStream(), STDERR));
 
             return syncProcess.waitFor();

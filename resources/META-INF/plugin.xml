@@ -27,10 +27,13 @@
   <extensions defaultExtensionNs="com.intellij">
     <runConfigurationProducer implementation="jheister.idearemoteexecute.RemoteExecutionConfigProducer"/>
     <configurationType implementation="jheister.idearemoteexecute.RemoteExecutionConfigType"/>
+    <applicationConfigurable instance="jheister.idearemoteexecute.RemoteExecutionSettingsDialog" />
   </extensions>
 
   <actions>
     <!-- Add your actions here -->
   </actions>
 
+    <application-components>
+    </application-components>
 </idea-plugin>

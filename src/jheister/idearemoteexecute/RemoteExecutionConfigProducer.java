@@ -3,6 +3,7 @@ package jheister.idearemoteexecute;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.RunConfigurationProducer;
 import com.intellij.execution.application.ApplicationConfigurationType;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiClass;
@@ -12,6 +13,8 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
     protected RemoteExecutionConfigProducer() {
         super(RemoteExecutionConfigType.getInstance());
     }
+
+    private final PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
 
     @Override
     protected boolean setupConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig,
@@ -30,7 +33,7 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
         Module module = configurationContext.getModule();
 
         remoteExecutionConfig.setModule(module);
-        remoteExecutionConfig.setName(mainClass.getName() + ".main() in DC");
+        remoteExecutionConfig.setName(mainClass.getName() + ".main() on " + propertiesComponent.getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, ""));
         remoteExecutionConfig.setClassToRun(mainClass.getQualifiedName());
 
         return true;
