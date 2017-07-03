@@ -63,7 +63,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
                 "ssh",
                 "-tt",
                 hostName,
-                javaExec + " -cp " + classpath + " " + config.getClassToRun() + " " + config.getCommandArgs()
+                javaExec + " -cp " + classpath + " " + config.getJvmArgs() + config.getClassToRun() + " " + config.getCommandArgs()
         };
     }
 

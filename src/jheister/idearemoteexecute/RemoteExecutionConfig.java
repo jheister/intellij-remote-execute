@@ -34,6 +34,7 @@ import java.util.List;
 public class RemoteExecutionConfig extends ModuleBasedConfiguration implements RunProfileWithCompileBeforeLaunchOption {
     private String classToRun = "";
     private String commandArgs = "";
+    private String jvmArgs;
 
     protected RemoteExecutionConfig(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(name, new RunConfigurationModule(project), factory);
@@ -101,6 +102,7 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
         readModule(element);
         classToRun = JDOMExternalizerUtil.readField(element, "classToRun", "");
         commandArgs = JDOMExternalizerUtil.readField(element, "commandArgs", "");
+        jvmArgs = JDOMExternalizerUtil.readField(element, "jvmArgs", "");
     }
 
     @Override
@@ -109,6 +111,7 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
         writeModule(element);
         JDOMExternalizerUtil.writeField(element, "classToRun", classToRun);
         JDOMExternalizerUtil.writeField(element, "commandArgs", commandArgs);
+        JDOMExternalizerUtil.writeField(element, "jvmArgs", jvmArgs);
     }
 
     @Override
@@ -124,5 +127,13 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
 
     public Module getModule() {
         return getModules()[0];
+    }
+
+    public String getJvmArgs() {
+        return jvmArgs;
+    }
+
+    public void setJvmArgs(String jvmArgs) {
+        this.jvmArgs = jvmArgs;
     }
 }
