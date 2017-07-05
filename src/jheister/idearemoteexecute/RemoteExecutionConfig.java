@@ -49,7 +49,7 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
     public List<VirtualFile> requiredFiles() {
         try {
             JavaParameters params = new JavaParameters();
-            params.configureByModule(getModule(), JavaParameters.CLASSES_ONLY);
+            params.configureByModule(getModule(), JavaParameters.CLASSES_AND_TESTS);
 
             return params.getClassPath().getVirtualFiles();
         } catch (Exception e) {
