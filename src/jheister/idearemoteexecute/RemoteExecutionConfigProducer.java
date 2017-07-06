@@ -33,7 +33,7 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
         Module module = configurationContext.getModule();
 
         remoteExecutionConfig.setModule(module);
-        remoteExecutionConfig.setName(mainClass.getName() + ".main() remotely");
+        remoteExecutionConfig.setName("Remote: " + mainClass.getName() + ".main()");
         remoteExecutionConfig.setClassToRun(mainClass.getQualifiedName());
 
         return true;
