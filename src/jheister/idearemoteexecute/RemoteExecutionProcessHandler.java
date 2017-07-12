@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -28,12 +29,16 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     private final RemoteExecutionConfig config;
     private final String hostName;
     private final String javaExec;
+    private final Optional<String> userName;
     private Future<?> runningProcess;
 
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config) {
         this.config = config;
         hostName = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, "");
         javaExec = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY, "");
+        userName = Optional.ofNullable(PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.USER_PROPERTY, ""))
+                .map(String::trim)
+                .filter(u -> !u.isEmpty());
     }
 
     @Override
@@ -62,7 +67,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
         return new String[] {
                 "ssh",
                 "-tt",
-                hostName,
+                userName.map(u -> u + "@").orElse("") + hostName,
                 javaExec + " -cp " + classpath + " " + config.getJvmArgs() + " " + config.getClassToRun() + " " + config.getCommandArgs()
         };
     }
@@ -79,7 +84,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
         cmdLine.add(0, "rsync");
         cmdLine.add(1, "-avh");
-        cmdLine.add(hostName + ":" + REMOTE_DIR);
+        cmdLine.add(userName.map(u -> u + "@").orElse("") + hostName + ":" + REMOTE_DIR);
         cmdLine.add("--delete");
 
         return cmdLine.toArray(new String[cmdLine.size()]);
