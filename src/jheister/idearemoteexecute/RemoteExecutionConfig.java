@@ -126,6 +126,9 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
     }
 
     public Module getModule() {
+        if (getModules().length == 0) {
+            return null;
+        }
         return getModules()[0];
     }
 
