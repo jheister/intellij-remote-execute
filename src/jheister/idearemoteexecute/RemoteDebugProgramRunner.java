@@ -40,8 +40,5 @@ public class RemoteDebugProgramRunner extends GenericDebuggerRunner {
         RemoteConnection con = new RemoteConnection(true, "localhost", "5005", false);
 
         return this.attachVirtualMachine(state, environment, con, true);
-
-        //todo: setup SSH tunnel for debug
-        //todo: shutdown debugger when app stops
     }
 }

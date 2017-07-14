@@ -29,15 +29,17 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     private final String hostName;
     private final String javaExec;
     private final Optional<String> userName;
-    private final String additionalJvmArgs;
+    private final String debugJvmArgs;
     private Future<?> runningProcess;
 
-    public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String additionalJvmArgs) {
+    private volatile Process debugTunnel;
+
+    public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String debugJvmArgs) {
         this.config = config;
         hostName = config.getHostName();
         javaExec = config.getJavaExec();
         userName = config.getUserName();
-        this.additionalJvmArgs = additionalJvmArgs;
+        this.debugJvmArgs = debugJvmArgs;
     }
 
     @Override
@@ -57,8 +59,25 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
                 notifyTextAvailable("Sync failed: " + result + "\n", STDERR);
                 throw new RuntimeException("Sync failed");
             }
-            notifyProcessTerminated(executeCommand(javaCommand(), STDOUT));
+
+            if (!debugJvmArgs.isEmpty()) {
+                debugTunnel = execute(new String[]{"ssh", hostName, "-L", "5005:localhost:5005"}, SYSTEM);
+            }
+
+            int r = executeCommand(javaCommand(), STDOUT);
+            destroySshTunnelIfPresent();
+            notifyProcessTerminated(r);
         });
+    }
+
+    private void destroySshTunnelIfPresent() {
+        try {
+            if (debugTunnel != null) {
+                debugTunnel.destroyForcibly().waitFor();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String[] javaCommand() {
@@ -67,7 +86,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
                 "ssh",
                 "-tt",
                 userName.map(u -> u + "@").orElse("") + hostName,
-                javaExec + " -cp " + classpath + " " + config.getJvmArgs() + " " + additionalJvmArgs + " " + config.getClassToRun() + " " + config.getCommandArgs()
+                javaExec + " -cp " + classpath + " " + config.getJvmArgs() + " " + debugJvmArgs + " " + config.getClassToRun() + " " + config.getCommandArgs()
         };
     }
 
@@ -90,22 +109,29 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     }
 
     private int executeCommand(String[] cmd, Key outType) {
-        notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
+        Process process = execute(cmd, outType);
 
         try {
-            Process syncProcess = new ProcessBuilder(cmd).start();
+            return process.waitFor();
+        } catch (InterruptedException x) {
+            try {
+                return process.destroyForcibly().waitFor();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private Process execute(String[] cmd, Key outType) {
+        try {
+            notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
+            Process process = new ProcessBuilder(cmd).start();
 
             ExecutorService io = Executors.newCachedThreadPool();
-            io.execute(textNotifierOf(syncProcess.getInputStream(), outType));
-            io.execute(textNotifierOf(syncProcess.getErrorStream(), STDERR));
-
-            try {
-                return syncProcess.waitFor();
-            } catch (InterruptedException e) {
-                return syncProcess.destroyForcibly().waitFor();
-            }
+            io.execute(textNotifierOf(process.getInputStream(), outType));
+            io.execute(textNotifierOf(process.getErrorStream(), STDERR));
+            return process;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -129,6 +155,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     @Override
     protected void destroyProcessImpl() {
         runningProcess.cancel(true);
+        destroySshTunnelIfPresent();
     }
 
     @Override
