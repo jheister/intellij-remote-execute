@@ -27,7 +27,6 @@ public class RemoteDebugProgramRunner extends GenericDebuggerRunner {
     @Nullable
     @Override
     protected RunContentDescriptor doExecute(@NotNull RunProfileState state, @NotNull ExecutionEnvironment environment) throws ExecutionException {
-        System.out.println("Using my custom runner");
         return super.doExecute(state, environment);
     }
 
@@ -39,8 +38,6 @@ public class RemoteDebugProgramRunner extends GenericDebuggerRunner {
         remoteState.setAdditionalJvmArgs("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
 
         RemoteConnection con = new RemoteConnection(true, "localhost", "5005", false);
-
-        System.out.println(con.getLaunchCommandLine());
 
         return this.attachVirtualMachine(state, environment, con, true);
 
