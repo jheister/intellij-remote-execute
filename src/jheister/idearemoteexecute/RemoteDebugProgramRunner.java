@@ -42,10 +42,9 @@ public class RemoteDebugProgramRunner extends GenericDebuggerRunner {
 
         System.out.println(con.getLaunchCommandLine());
 
-        return this.attachVirtualMachine(state, environment, con, false);
+        return this.attachVirtualMachine(state, environment, con, true);
 
         //todo: setup SSH tunnel for debug
-        //todo: handle racecondition between debugger starting + app starting
         //todo: shutdown debugger when app stops
     }
 }
