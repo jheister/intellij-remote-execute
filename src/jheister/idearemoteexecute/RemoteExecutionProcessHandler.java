@@ -1,7 +1,6 @@
 package jheister.idearemoteexecute;
 
 import com.intellij.execution.process.ProcessHandler;
-import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.util.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,15 +29,15 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     private final String hostName;
     private final String javaExec;
     private final Optional<String> userName;
+    private final String additionalJvmArgs;
     private Future<?> runningProcess;
 
-    public RemoteExecutionProcessHandler(RemoteExecutionConfig config) {
+    public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String additionalJvmArgs) {
         this.config = config;
-        hostName = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, "");
-        javaExec = PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY, "");
-        userName = Optional.ofNullable(PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.USER_PROPERTY, ""))
-                .map(String::trim)
-                .filter(u -> !u.isEmpty());
+        hostName = config.getHostName();
+        javaExec = config.getJavaExec();
+        userName = config.getUserName();
+        this.additionalJvmArgs = additionalJvmArgs;
     }
 
     @Override
@@ -68,7 +67,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
                 "ssh",
                 "-tt",
                 userName.map(u -> u + "@").orElse("") + hostName,
-                javaExec + " -cp " + classpath + " " + config.getJvmArgs() + " " + config.getClassToRun() + " " + config.getCommandArgs()
+                javaExec + " -cp " + classpath + " " + config.getJvmArgs() + " " + additionalJvmArgs + " " + config.getClassToRun() + " " + config.getCommandArgs()
         };
     }
 

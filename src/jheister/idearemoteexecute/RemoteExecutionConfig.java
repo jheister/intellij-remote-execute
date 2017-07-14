@@ -16,6 +16,7 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class RemoteExecutionConfig extends ModuleBasedConfiguration implements RunProfileWithCompileBeforeLaunchOption {
     private String classToRun = "";
@@ -60,19 +62,7 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
     @Nullable
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment executionEnvironment) throws ExecutionException {
-        return new RunProfileState() {
-            @Nullable
-            @Override
-            public ExecutionResult execute(Executor executor, @NotNull ProgramRunner programRunner) throws ExecutionException {
-                ConsoleView console = TextConsoleBuilderFactory.getInstance().createBuilder(getProject()).getConsole();
-                ProcessHandler processHandler = new RemoteExecutionProcessHandler(RemoteExecutionConfig.this);
-                DefaultExecutionResult result = new DefaultExecutionResult(console, processHandler);
-                console.attachToProcess(processHandler);
-                processHandler.startNotify();
-
-                return result;
-            }
-        };
+        return new RemoteExecutionRunProfileState(this);
     }
 
     @Nullable
@@ -138,5 +128,49 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
 
     public void setJvmArgs(String jvmArgs) {
         this.jvmArgs = jvmArgs;
+    }
+
+    public String getHostName() {
+        return PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, "");
+    }
+
+    public String getJavaExec() {
+        return PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY, "");
+    }
+
+    public Optional<String> getUserName() {
+        return Optional.of(PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.USER_PROPERTY, ""))
+                .map(String::trim)
+                .filter(u -> !u.isEmpty());
+    }
+
+
+    public static class RemoteExecutionRunProfileState implements RunProfileState {
+        private final RemoteExecutionConfig config;
+        private String additionalJvmArgs = "";
+
+        public RemoteExecutionRunProfileState(RemoteExecutionConfig config) {
+            this.config = config;
+        }
+
+        @Nullable
+        @Override
+        public ExecutionResult execute(Executor executor, @NotNull ProgramRunner programRunner) throws ExecutionException {
+            ConsoleView console = TextConsoleBuilderFactory.getInstance().createBuilder(config.getProject()).getConsole();
+            ProcessHandler processHandler = new RemoteExecutionProcessHandler(config, additionalJvmArgs);
+            DefaultExecutionResult result = new DefaultExecutionResult(console, processHandler);
+            console.attachToProcess(processHandler);
+            processHandler.startNotify();
+
+            return result;
+        }
+
+        public void setAdditionalJvmArgs(String args) {
+            additionalJvmArgs = args;
+        }
+
+        public String hostName() {
+            return config.getHostName();
+        }
     }
 }

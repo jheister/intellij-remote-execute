@@ -28,6 +28,7 @@
     <runConfigurationProducer implementation="jheister.idearemoteexecute.RemoteExecutionConfigProducer"/>
     <configurationType implementation="jheister.idearemoteexecute.RemoteExecutionConfigType"/>
     <applicationConfigurable instance="jheister.idearemoteexecute.RemoteExecutionSettingsDialog" />
+    <programRunner implementation="jheister.idearemoteexecute.RemoteDebugProgramRunner" />
   </extensions>
 
   <actions>
