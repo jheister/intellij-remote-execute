@@ -3,3 +3,7 @@ plugins {
 }
 
 version = System.getenv("TRAVIS_TAG")
+
+intellij {
+    version '2017.1.3'
+}
