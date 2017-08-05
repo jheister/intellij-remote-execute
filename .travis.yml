@@ -1,5 +1,12 @@
 language: java
 jdk: oraclejdk8
-
 script:
-  - ./gradlew build
+- ./gradlew build
+deploy:
+  provider: releases
+  api_key:
+    secure: LxZclBzLRKMk8HlXMFkyvxqsBXGGDg0RdWhYmF8EEt+XgkxOURM7JsyglH5S/o9Ex1/ik6PprIhfAJHWSdXdeGRULZQOhN2qgvf50gz7svEAcuNqV83E8GPWIJwl1+UlIjKjTkwHVxknbelCTk9zb0Ew2TmsPveOm7qlpEe8+8d5dwdCBOe7HxjafBskbZPec4UAuZietvnRBfdRGN0WgUWgByyhYiAhtWcusQ5rudAwD0i3topYeOigCyri6/l/exGKGKcuGFeRnJlxgCvBBQYEnOnXjYN9R89GNuQs1xqEBt8ZET4y6M9+mFGndg3TSno8uouvYSFL8K4NEIpK08sZHSaBM/X0uDXuUWHGYxiUHnMUb2SgUwNa7Ui7HW+jS3VXjg2ojHTeSCosDNTOCH+scrGtd4V4bPa0EjLiqT+bO04nTbMp/3tvkPTL+Sjdq006FI0FtmNNfu9f36OWcg+I229IUJxwP72PsL86DYGPcQ0y3ceD4LIDt8TEVEuok945VUk0urVQf2rwQjhOqXu18JnKHaujgoiwcid1e1gsG4vZKs++CWng/nLqmeBbeugTytrt69lM+WWDkb0hkQu9kpAd2GNwUuCa7UI7xww/L8DLNw2EqtHiCdmrT4OYh7wFuVUtMpdmJD5tgtqLKijQVA7dXNpLDreAeYEsbOU=
+  file: build/libs/intellij-remote-execute-$TRAVIS_TAG.jar
+  skip_cleanup: true
+  on:
+    tags: true
