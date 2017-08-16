@@ -34,6 +34,8 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     private volatile Process debugTunnel;
 
+    private final DelegateOrDropOutputStream delegateOrDropOutput = new DelegateOrDropOutputStream();
+
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String debugJvmArgs) {
         this.config = config;
         hostName = config.getHostName();
@@ -127,6 +129,8 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
             Process process = new ProcessBuilder(cmd).start();
 
+            delegateOrDropOutput.setOutput(process.getOutputStream());
+
             ExecutorService io = Executors.newCachedThreadPool();
             io.execute(textNotifierOf(process.getInputStream(), outType));
             io.execute(textNotifierOf(process.getErrorStream(), STDERR));
@@ -172,6 +176,50 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     @Nullable
     @Override
     public OutputStream getProcessInput() {
-        return null;
+        return delegateOrDropOutput;
+    }
+
+    private static class DelegateOrDropOutputStream extends OutputStream {
+        private volatile OutputStream delegate;
+
+        interface OutputStreamWork {
+            void accept(OutputStream out) throws IOException;
+        }
+
+        private void setOutput(OutputStream output) {
+            delegate = output;
+        }
+
+        private void ifPresent(OutputStreamWork work) throws IOException {
+            OutputStream d = delegate;
+            if (d != null) {
+                work.accept(d);
+            }
+        }
+
+        @Override
+        public void write(@NotNull byte[] b) throws IOException {
+            ifPresent(o -> o.write(b));
+        }
+
+        @Override
+        public void write(@NotNull byte[] b, int off, int len) throws IOException {
+            ifPresent(o -> o.write(b, off, len));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            ifPresent(OutputStream::flush);
+        }
+
+        @Override
+        public void close() throws IOException {
+            ifPresent(OutputStream::close);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            ifPresent(o -> o.write(b));
+        }
     }
 }
