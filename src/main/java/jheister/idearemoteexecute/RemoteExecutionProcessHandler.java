@@ -63,7 +63,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             }
 
             if (!debugJvmArgs.isEmpty()) {
-                debugTunnel = execute(new String[]{"ssh", hostName, "-L", "5005:localhost:5005"}, SYSTEM);
+                debugTunnel = execute(new String[]{"ssh", userName.map(u -> u + "@").orElse("") + hostName, "-L", "5005:localhost:5005"}, SYSTEM);
             }
 
             int r = executeCommand(javaCommand(), STDOUT);
