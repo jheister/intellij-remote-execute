@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class RemoteExecutionProcessHandler extends ProcessHandler {
-    public static final String REMOTE_DIR = "idea-remote-execution";
+    private static final String REMOTE_DIR = "idea-remote-execution";
     private final RemoteExecutionConfig config;
     private final String hostName;
     private final String javaExec;
@@ -38,9 +38,9 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String debugJvmArgs) {
         this.config = config;
-        hostName = config.getHostName();
-        javaExec = config.getJavaExec();
-        userName = config.getUserName();
+        this.hostName = config.getHostName();
+        this.javaExec = config.getJavaExec();
+        this.userName = config.getUserName();
         this.debugJvmArgs = debugJvmArgs;
     }
 

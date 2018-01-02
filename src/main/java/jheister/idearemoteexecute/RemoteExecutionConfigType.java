@@ -1,6 +1,5 @@
 package jheister.idearemoteexecute;
 
-import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
