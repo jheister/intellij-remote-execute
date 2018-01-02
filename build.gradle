@@ -1,13 +1,9 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.2.15"
+    id "org.jetbrains.intellij" version "0.2.17"
 }
 
 version = System.getenv("TRAVIS_TAG")
 
 intellij {
-    version '2017.1.3'
-}
-
-patchPluginXml {
-    untilBuild '172.*'
+    version '2017.3'
 }
