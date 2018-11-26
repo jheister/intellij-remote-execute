@@ -6,8 +6,11 @@ import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.GridLayout;
 import java.util.Objects;
 
 public class RemoteExecutionSettingsDialog implements Configurable  {
