@@ -6,13 +6,9 @@ This is a IntelliJ plugin designed to allow you to copy your code to a server an
 The logs display within IntelliJ and you can even debug the running code!
 
 ## Compatibility
-
 This plugin works in both Community Edition and Ultimate Edition of IntelliJ IDEA.
 
-We support any version of IntelliJ higher than v145.0 (e.g. IntelliJ IDEA 2017.2.2 is v172.*)
-
 ## Installation
-
 The current process of installation is as follows:
 
 1) Obtain the `intellij-remote-execute.jar` (version of your choosing)
@@ -27,7 +23,6 @@ The current process of installation is as follows:
 8) IntelliJ IDEA will probably prompt you to restart, do so at your leisure :)
 
 ## Building this plugin
-
 `./gradlew build`
 
 You may have to set the execution permissions `gradlew` first:
@@ -37,7 +32,6 @@ You may have to set the execution permissions `gradlew` first:
 Alternatively just run via your native `gradle`.
 
 ## Configuring the plugin
-
 Once the plugin is successfully installed, you can configure it via `Preferences`.
 
 You will find it at the bottom, under `Other Settings > Remote execution`.
@@ -49,11 +43,9 @@ There you can set:
 - Java executable (the path to Java on the server)
 
 ## Invoking the remote executor
-
 Simply right click the Java class you wish to run and 
 
 ## Bugs
-
 Note that there is a bug around not being able to trigger remote execution if you have a local execution config saved.
 To fix this, you have to delete the local execution config and then invoke the remote executor.
 
