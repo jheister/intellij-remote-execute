@@ -5,5 +5,5 @@ plugins {
 version = System.getenv("TRAVIS_TAG")
 
 intellij {
-    version '2018.1'
+    version '2019.1'
 }
