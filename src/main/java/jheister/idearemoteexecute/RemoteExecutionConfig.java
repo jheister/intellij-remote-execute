@@ -16,7 +16,6 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
-import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
@@ -31,12 +30,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public class RemoteExecutionConfig extends ModuleBasedConfiguration implements RunProfileWithCompileBeforeLaunchOption {
     private String classToRun = "";
     private String commandArgs = "";
     private String jvmArgs;
+
+    private String remoteHost;
+    private String remoteJavaExec;
+    private String remoteUser;
+
 
     protected RemoteExecutionConfig(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(name, new RunConfigurationModule(project), factory);
@@ -93,6 +96,9 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
         classToRun = JDOMExternalizerUtil.readField(element, "classToRun", "");
         commandArgs = JDOMExternalizerUtil.readField(element, "commandArgs", "");
         jvmArgs = JDOMExternalizerUtil.readField(element, "jvmArgs", "");
+        remoteHost = JDOMExternalizerUtil.readField(element, "remoteHost", "");
+        remoteJavaExec = JDOMExternalizerUtil.readField(element, "remoteJavaExec", "");
+        remoteUser = JDOMExternalizerUtil.readField(element, "remoteUser", "");
     }
 
     @Override
@@ -102,6 +108,9 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
         JDOMExternalizerUtil.writeField(element, "classToRun", classToRun);
         JDOMExternalizerUtil.writeField(element, "commandArgs", commandArgs);
         JDOMExternalizerUtil.writeField(element, "jvmArgs", jvmArgs);
+        JDOMExternalizerUtil.writeField(element, "remoteHost", remoteHost);
+        JDOMExternalizerUtil.writeField(element, "remoteJavaExec", remoteJavaExec);
+        JDOMExternalizerUtil.writeField(element, "remoteUser", remoteUser);
     }
 
     @Override
@@ -130,18 +139,28 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
         this.jvmArgs = jvmArgs;
     }
 
-    public String getHostName() {
-        return PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY, "");
+    public String getRemoteHost() {
+        return remoteHost;
     }
 
-    public String getJavaExec() {
-        return PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY, "");
+    public String getRemoteJavaExec() {
+        return remoteJavaExec;
     }
 
-    public Optional<String> getUserName() {
-        return Optional.of(PropertiesComponent.getInstance().getValue(RemoteExecutionSettingsDialog.USER_PROPERTY, ""))
-                .map(String::trim)
-                .filter(u -> !u.isEmpty());
+    public String getRemoteUser() {
+        return remoteUser;
+    }
+
+    public void setRemoteHost(String remoteHost) {
+        this.remoteHost = remoteHost;
+    }
+
+    public void setRemoteJavaExec(String remoteJavaExec) {
+        this.remoteJavaExec = remoteJavaExec;
+    }
+
+    public void setRemoteUser(String remoteUser) {
+        this.remoteUser = remoteUser;
     }
 
 
@@ -167,10 +186,6 @@ public class RemoteExecutionConfig extends ModuleBasedConfiguration implements R
 
         public void setAdditionalJvmArgs(String args) {
             additionalJvmArgs = args;
-        }
-
-        public String hostName() {
-            return config.getHostName();
         }
     }
 }
