@@ -7,3 +7,8 @@ version = System.getenv("TRAVIS_TAG")
 intellij {
     version '2019.1'
 }
+
+compileJava   {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
