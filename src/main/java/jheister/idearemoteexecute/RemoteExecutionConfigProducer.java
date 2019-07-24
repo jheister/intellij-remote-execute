@@ -9,6 +9,14 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 
+import java.util.Optional;
+
+import static jheister.idearemoteexecute.RemoteExecutionSettingsDialog.COMMAND_ARGS_PROPERTY;
+import static jheister.idearemoteexecute.RemoteExecutionSettingsDialog.HOSTNAME_PROPERTY;
+import static jheister.idearemoteexecute.RemoteExecutionSettingsDialog.JAVA_EXEC_PROPERTY;
+import static jheister.idearemoteexecute.RemoteExecutionSettingsDialog.JVM_ARGS_PROPERTY;
+import static jheister.idearemoteexecute.RemoteExecutionSettingsDialog.USER_PROPERTY;
+
 public class RemoteExecutionConfigProducer extends RunConfigurationProducer<RemoteExecutionConfig> {
     protected RemoteExecutionConfigProducer() {
         super(RemoteExecutionConfigType.getInstance());
@@ -35,9 +43,15 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
         remoteExecutionConfig.setModule(module);
         remoteExecutionConfig.setName("Remote: " + mainClass.getName() + ".main()");
         remoteExecutionConfig.setClassToRun(mainClass.getQualifiedName());
+        remoteExecutionConfig.setJvmArgs(propertiesComponent.getValue(JVM_ARGS_PROPERTY, ""));
+        remoteExecutionConfig.setCommandArgs(propertiesComponent.getValue(COMMAND_ARGS_PROPERTY, ""));
+        remoteExecutionConfig.setRemoteUser(getTrimmedUserName());
+        remoteExecutionConfig.setRemoteJavaExec(propertiesComponent.getValue(JAVA_EXEC_PROPERTY, ""));
+        remoteExecutionConfig.setRemoteHost(propertiesComponent.getValue(HOSTNAME_PROPERTY, ""));
 
         return true;
     }
+
 
     @Override
     public boolean isConfigurationFromContext(RemoteExecutionConfig remoteExecutionConfig, ConfigurationContext configurationContext) {
@@ -48,4 +62,10 @@ public class RemoteExecutionConfigProducer extends RunConfigurationProducer<Remo
                 && configurationContext.getModule().equals(remoteExecutionConfig.getModule())
                 && mainClass.getQualifiedName().equals(remoteExecutionConfig.getClassToRun());
     }
+
+
+    private String getTrimmedUserName() {
+        return Optional.of(propertiesComponent.getValue(USER_PROPERTY, "")).map(String::trim).orElse("");
+    }
+
 }

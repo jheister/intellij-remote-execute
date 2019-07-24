@@ -2,6 +2,7 @@ package jheister.idearemoteexecute;
 
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,9 +39,9 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     public RemoteExecutionProcessHandler(RemoteExecutionConfig config, String debugJvmArgs) {
         this.config = config;
-        this.hostName = config.getHostName();
-        this.javaExec = config.getJavaExec();
-        this.userName = config.getUserName();
+        this.hostName = config.getRemoteHost();
+        this.javaExec = config.getRemoteJavaExec();
+        this.userName = Optional.ofNullable(config.getRemoteUser());
         this.debugJvmArgs = debugJvmArgs;
     }
 
@@ -54,9 +55,11 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
             return;
         }
 
+        List<VirtualFile> requiredFiles = config.requiredFiles();
+
         runningProcess = Executors.newSingleThreadExecutor().submit(() -> {
             notifyTextAvailable("Going to run on " + hostName + " with " + javaExec + "\n", STDERR);
-            int result = executeCommand(syncCommand(), SYSTEM);
+            int result = executeCommand(syncCommand(requiredFiles), SYSTEM);
             if (result != 0) {
                 notifyTextAvailable("Sync failed: " + result + "\n", STDERR);
                 throw new RuntimeException("Sync failed");
@@ -66,7 +69,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
                 debugTunnel = execute(new String[]{"ssh", userName.map(u -> u + "@").orElse("") + hostName, "-L", "5005:localhost:5005"}, SYSTEM);
             }
 
-            int r = executeCommand(javaCommand(), STDOUT);
+            int r = executeCommand(javaCommand(requiredFiles), STDOUT);
             destroySshTunnelIfPresent();
             notifyProcessTerminated(r);
         });
@@ -82,8 +85,8 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
         }
     }
 
-    private String[] javaCommand() {
-        String classpath = config.requiredFiles().stream().map(f -> REMOTE_DIR + "/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
+    private String[] javaCommand(List<VirtualFile> requiredFiles) {
+        String classpath = requiredFiles.stream().map(f -> REMOTE_DIR + "/" + f.getName()).collect(toSet()).stream().collect(joining(":"));
         return new String[] {
                 "ssh",
                 "-tt",
@@ -93,8 +96,8 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
     }
 
     @NotNull
-    private String[] syncCommand() {
-        List<String> cmdLine = config.requiredFiles().stream().map(f -> {
+    private String[] syncCommand(List<VirtualFile> requiredFiles) {
+        List<String> cmdLine = requiredFiles.stream().map(f -> {
             if (!f.isInLocalFileSystem()) {
                 throw new RuntimeException("Cannot sync file " + f.getPath() + " it is not local");
             }
