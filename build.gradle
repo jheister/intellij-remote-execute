@@ -1,11 +1,12 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.4.7"
+    id "org.jetbrains.intellij" version "0.4.9"
 }
 
 version = System.getenv("TRAVIS_TAG")
 
 intellij {
-    version '2019.1'
+    version '2019.2'
+    plugins 'java'
 }
 
 compileJava   {
