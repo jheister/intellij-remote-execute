@@ -68,7 +68,7 @@ public class RemoteExecutionSettingsDialog implements Configurable  {
         commandArgsField.setText(propertiesComponent.getValue(COMMAND_ARGS_PROPERTY, ""));
         hostNameField.setText(propertiesComponent.getValue(HOSTNAME_PROPERTY, ""));
         remoteUserField.setText(propertiesComponent.getValue(USER_PROPERTY, ""));
-        javaExecField.setText(propertiesComponent.getValue(JAVA_EXEC_PROPERTY, ""));
+        javaExecField.setText(propertiesComponent.getValue(JAVA_EXEC_PROPERTY, "java"));
 
         return container;
     }

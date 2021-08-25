@@ -59,9 +59,10 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
         runningProcess = Executors.newSingleThreadExecutor().submit(() -> {
             notifyTextAvailable("Going to run on " + hostName + " with " + javaExec + "\n", STDERR);
-            int result = executeCommand(syncCommand(requiredFiles), SYSTEM);
+            int result = executeCommand(syncCommand(requiredFiles), STDERR);
             if (result != 0) {
                 notifyTextAvailable("Sync failed: " + result + "\n", STDERR);
+                notifyProcessTerminated(result);
                 throw new RuntimeException("Sync failed");
             }
 
@@ -129,7 +130,7 @@ public class RemoteExecutionProcessHandler extends ProcessHandler {
 
     private Process execute(String[] cmd, Key outType) {
         try {
-            notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", SYSTEM);
+            notifyTextAvailable(asList(cmd).stream().collect(joining(" ")) + "\n", STDERR);
             Process process = new ProcessBuilder(cmd).start();
 
             delegateOrDropOutput.setOutput(process.getOutputStream());
