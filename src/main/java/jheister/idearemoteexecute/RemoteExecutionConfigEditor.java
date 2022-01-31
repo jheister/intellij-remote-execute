@@ -34,6 +34,8 @@ class RemoteExecutionConfigEditor extends SettingsEditor<RemoteExecutionConfig> 
 
     @Override
     protected void applyEditorTo(@NotNull RemoteExecutionConfig o) throws ConfigurationException {
+        o.setClassToRun(classToRun.getText());
+        o.setModuleName(module.getText());
         o.setCommandArgs(commandArgs.getText());
         o.setJvmArgs(jvmArgs.getText());
         o.setRemoteHost(remoteHost.getText());
