@@ -8,8 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 
 class RemoteExecutionConfigEditor extends SettingsEditor<RemoteExecutionConfig> {
-    private JLabel classToRun = new JLabel("");
-    private JLabel module = new JLabel("");
+    private JTextField classToRun = new JTextField("");
+    private JTextField module = new JTextField("");
     private JTextField commandArgs = new JTextField();
     private JTextField jvmArgs = new JTextField();
     private JTextField remoteHost = new JTextField();
@@ -34,6 +34,8 @@ class RemoteExecutionConfigEditor extends SettingsEditor<RemoteExecutionConfig> 
 
     @Override
     protected void applyEditorTo(@NotNull RemoteExecutionConfig o) throws ConfigurationException {
+        o.setClassToRun(classToRun.getText());
+        o.setModuleName(module.getText());
         o.setCommandArgs(commandArgs.getText());
         o.setJvmArgs(jvmArgs.getText());
         o.setRemoteHost(remoteHost.getText());

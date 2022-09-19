@@ -2,21 +2,19 @@
   <id>jheister.intellijremoteexecute</id>
   <name>intellij-remote-execute</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="no@email.com" url="https://github.com/jheister/intellij-remote-execute">Justin Heister</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      This is a IntelliJ plugin designed to allow you to copy your code to a server and run it. <br/>
+      The logs display within IntelliJ and you can even debug the running code! <br/>
+      Simply right click the Java class you wish to run and select Run 'Remote ...' or Debug 'Remote ...' option. <br/>
+      Note: this works only if you don't have other Run options on this class
     ]]></description>
 
-  <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
-    ]]>
-  </change-notes>
+  <change-notes></change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="145.0"/>
+  <idea-version since-build="173.0"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
